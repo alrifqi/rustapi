@@ -1,6 +1,6 @@
-use axum::{Json, extract };
-use serde::{ Deserialize };
-use serde_json::{json, Value };
+use axum::{extract, Json};
+use serde::Deserialize;
+use serde_json::{json, Value};
 
 const DEFAULT_PASSWORD: &str = "defaultpassword";
 
@@ -10,7 +10,7 @@ pub struct AuthLogin {
     password: Option<String>,
 }
 
-pub async fn post_auth(extract::Json(payload): extract::Json<AuthLogin>) -> Json<Value>{
+pub async fn post_auth(extract::Json(payload): extract::Json<AuthLogin>) -> Json<Value> {
     let pass = match &payload.password {
         Some(val) => val.to_string(),
         _ => DEFAULT_PASSWORD.to_string(),
@@ -18,3 +18,4 @@ pub async fn post_auth(extract::Json(payload): extract::Json<AuthLogin>) -> Json
 
     Json(json!({ "message": "success", "username": payload.username, "password": pass}))
 }
+
