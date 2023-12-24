@@ -1,10 +1,13 @@
+use std::time::Duration;
+
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
 
 pub async fn init_connection(env: &str) -> Pool<Postgres> {
-    let pool_conn = PgPoolOptions::new().max_connections(5).connect(env).await;
-    match pool_conn {
-        Ok(p) => p,
-        Err(err) => panic!("Connection failure: {}", err),
-    }
+    PgPoolOptions::new()
+        .max_connections(5)
+        .acquire_timeout(Duration::new(5, 0))
+        .connect(env)
+        .await
+        .unwrap_or_else(|_| panic!("Database Connection failure"))
 }
