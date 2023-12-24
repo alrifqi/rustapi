@@ -8,8 +8,10 @@ use crate::config::Config;
 
 pub mod auth;
 
-pub async fn serve(config: Config) -> Router<()> {
+pub async fn serve(_: Config) -> Router<()> {
     Router::new()
         .route("/", get(|| async { "Hello World" }))
-        .route("/auth/login", post(auth::post_auth))
+        .route("/me", get(auth::services::get_me))
+        .route("/auth/login", post(auth::services::post_auth))
+        .route("/auth/signup", post(auth::services::post_signup))
 }
