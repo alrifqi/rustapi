@@ -1,10 +1,8 @@
+use crate::config::Config;
 use axum::{
     routing::{get, post},
     Router,
 };
-use sqlx::{PgPool, Postgres};
-
-use crate::config::Config;
 
 pub mod auth;
 
