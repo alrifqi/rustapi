@@ -1,6 +1,10 @@
-use std::u8;
-
-use axum::{extract, Json};
+use crate::routes::ApiResponse;
+use axum::{
+    extract,
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Json,
+};
 use serde_json::{json, Value};
 
 const DEFAULT_PASSWORD: &str = "defaultpassword";
@@ -9,12 +13,22 @@ pub async fn post_signup(extract::Json(payload): extract::Json<super::PostSignup
     Json(json!({ "message": "success", "data": payload }))
 }
 
-pub async fn post_auth(extract::Json(payload): extract::Json<super::AuthLogin>) -> Json<Value> {
+pub async fn post_auth(extract::Json(payload): extract::Json<super::AuthLogin>) -> Response {
     let validation = payload.validate();
     if !validation.message.is_empty() {
-        return Json(json!({ "message": validation.message }));
+        return ApiResponse {
+            status: StatusCode::BAD_REQUEST,
+            message: "error",
+            data: json!({}),
+        }
+        .response();
     }
-    Json(json!({ "message": "success", "data": validation.payload }))
+    ApiResponse {
+        status: StatusCode::CREATED,
+        message: "success",
+        data: json!(validation.payload),
+    }
+    .response()
 }
 
 pub async fn get_me() -> Json<Value> {
