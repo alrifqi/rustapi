@@ -1,3 +1,4 @@
+use axum::Extension;
 use clap::Parser;
 use rustapi::config::Config;
 use rustapi::database;
@@ -14,7 +15,7 @@ async fn main() {
     let db = database::init_connection(&config.database_url).await;
     sqlx::migrate!().run(&db).await.unwrap();
 
-    let app = routes::serve(config).await;
+    let app = routes::serve(config, db).await;
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
     axum::serve(listener, app).await.unwrap();
 }
