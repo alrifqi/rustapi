@@ -1,4 +1,4 @@
-use crate::config::Config;
+use crate::{config::Config, services::{auth}};
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -9,7 +9,6 @@ use serde::Serialize;
 use serde_json::json;
 use sqlx::PgPool;
 
-pub mod auth;
 
 #[derive(Clone)]
 pub struct ApiContext {
@@ -19,13 +18,13 @@ pub struct ApiContext {
 
 #[derive(Clone)]
 pub struct ApiResponse<T: Serialize> {
-    status: StatusCode,
-    message: &'static str,
-    data: T,
+    pub status: StatusCode,
+    pub message: &'static str,
+    pub data: T,
 }
 
 impl<T: Serialize> ApiResponse<T> {
-    fn response(&self) -> Response {
+    pub fn response(&self) -> Response {
         (
             self.status,
             Json(json!({"message": self.message, "data": self.data})),
@@ -37,8 +36,8 @@ impl<T: Serialize> ApiResponse<T> {
 pub async fn serve(cfg: Config, db: PgPool) -> Router<()> {
     Router::new()
         .route("/", get(|| async { "Hello World" }))
-        .route("/me", get(auth::services::get_me))
-        .route("/auth/login", post(auth::services::post_auth))
-        .route("/auth/signup", post(auth::services::post_signup))
+        .route("/me", get(auth::get_me))
+        .route("/auth/login", post(auth::post_auth))
+        .route("/auth/signup", post(auth::post_signup))
         .with_state(ApiContext { cfg, db })
 }

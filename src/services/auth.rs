@@ -1,4 +1,4 @@
-use crate::routes::{ApiContext, ApiResponse};
+use crate::{routes::{ApiContext, ApiResponse}, AuthLogin, PostSignup};
 use axum::{
     extract::{self, Json, State},
     http::StatusCode,
@@ -8,13 +8,13 @@ use serde_json::{json, Value};
 
 const DEFAULT_PASSWORD: &str = "defaultpassword";
 
-pub async fn post_signup(extract::Json(payload): extract::Json<super::PostSignup>) -> Json<Value> {
+pub async fn post_signup(extract::Json(payload): extract::Json<PostSignup>) -> Json<Value> {
     Json(json!({ "message": "success", "data": payload }))
 }
 
 pub async fn post_auth(
     State(state): State<ApiContext>,
-    Json(payload): Json<super::AuthLogin>,
+    Json(payload): Json<AuthLogin>,
 ) -> Response {
     let validation = payload.validate();
     if !validation.message.is_empty() {
@@ -22,8 +22,7 @@ pub async fn post_auth(
             status: StatusCode::BAD_REQUEST,
             message: "error",
             data: json!({}),
-        }
-        .response();
+        }.response();
     }
     ApiResponse {
         status: StatusCode::CREATED,
