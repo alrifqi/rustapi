@@ -1,8 +1,8 @@
 pub mod config;
 pub mod database;
 pub mod logger;
+pub mod repository;
 pub mod routes;
-pub mod services;
 pub mod usecases;
 
 use serde::{Deserialize, Serialize};
