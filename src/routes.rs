@@ -1,4 +1,4 @@
-use crate::{config::Config, services::{auth}};
+use crate::{config::Config, usecases::{user}};
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -36,8 +36,8 @@ impl<T: Serialize> ApiResponse<T> {
 pub async fn serve(cfg: Config, db: PgPool) -> Router<()> {
     Router::new()
         .route("/", get(|| async { "Hello World" }))
-        .route("/me", get(auth::get_me))
-        .route("/auth/login", post(auth::post_auth))
-        .route("/auth/signup", post(auth::post_signup))
+        .route("/me", get(user::get_me))
+        .route("/auth/login", post(user::post_auth))
+        .route("/auth/signup", post(user::post_signup))
         .with_state(ApiContext { cfg, db })
 }
