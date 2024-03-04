@@ -1,19 +1,30 @@
-use crate::{routes::{ApiContext, ApiResponse}, AuthLogin, PostSignup};
+use std::sync::Arc;
+
+use crate::{
+    repository::user,
+    routes::{ApiContext, ApiResponse},
+    AuthLogin, PostSignup,
+};
 use axum::{
-    extract::{self, Json, State},
+    extract::{self, Json},
     http::StatusCode,
     response::Response,
+    Extension,
 };
 use serde_json::{json, Value};
 
 const DEFAULT_PASSWORD: &str = "defaultpassword";
 
-pub async fn post_signup(extract::Json(payload): extract::Json<PostSignup>) -> Json<Value> {
+pub async fn post_signup(
+    Extension(ctx): Extension<ApiContext>,
+    extract::Json(payload): extract::Json<PostSignup>,
+) -> Json<Value> {
+    user::get_user_by_email(ctx.db_conn(), payload.email.clone());
     Json(json!({ "message": "success", "data": payload }))
 }
 
 pub async fn post_auth(
-    State(state): State<ApiContext>,
+    Extension(ctx): Extension<ApiContext>,
     Json(payload): Json<AuthLogin>,
 ) -> Response {
     let validation = payload.validate();
@@ -22,7 +33,8 @@ pub async fn post_auth(
             status: StatusCode::BAD_REQUEST,
             message: "error",
             data: json!({}),
-        }.response();
+        }
+        .response();
     }
     ApiResponse {
         status: StatusCode::CREATED,

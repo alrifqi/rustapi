@@ -1,4 +1,4 @@
-use crate::{config::Config, usecases::{user}};
+use crate::{config::Config, usecases::user};
 use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
@@ -9,11 +9,21 @@ use serde::Serialize;
 use serde_json::json;
 use sqlx::PgPool;
 
-
+#[warn(dead_code)]
 #[derive(Clone)]
 pub struct ApiContext {
     cfg: Config,
-    db: PgPool,
+    pub db: PgPool,
+}
+
+impl ApiContext {
+    pub fn db_conn(&self) -> PgPool {
+        self.db.clone()
+    }
+
+    pub fn app_conf(&self) -> Config {
+        self.cfg.clone()
+    }
 }
 
 #[derive(Clone)]
@@ -39,5 +49,6 @@ pub async fn serve(cfg: Config, db: PgPool) -> Router<()> {
         .route("/me", get(user::get_me))
         .route("/auth/login", post(user::post_auth))
         .route("/auth/signup", post(user::post_signup))
-        .with_state(ApiContext { cfg, db })
+        .layer(Extension(ApiContext { cfg, db }))
+    //.with_state(ApiContext { cfg, db })
 }
